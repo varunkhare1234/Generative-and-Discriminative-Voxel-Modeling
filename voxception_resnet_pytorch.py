@@ -13,7 +13,7 @@ from skimage import io, transform
     
 def weights_init(m):
     ##later call net = voxception(); net.apply(weights_init) to recursively set init
-    if isinstance(m, nn.Conv3d):
+    if isinstance(m, nn.Conv3d) or isinstance(m, nn.Linear):
         nn.init.orthogonal_(m.weight.data, gain = torch.sqrt(2))
         nn.init.orthogonal_(m.bias.data, gain = torch.sqrt(2))
     elif isinstance(m, nn.BatchNorm3d):
