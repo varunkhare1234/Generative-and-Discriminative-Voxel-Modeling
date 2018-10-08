@@ -37,10 +37,9 @@ def train(model, device, train_loader, optimizer, epoch,losslist,loss):
         b_idx+=1
         
         
-        x_feat, label = x['feature'].to(device), x['class_label'].type(torch.LongTensor).to(device)
+        x_feat, label = x['feature'].type(torch.FloatTensor).to(device), x['class_label'].type(torch.LongTensor).to(device)
         optimizer.zero_grad()
         prediction = model(x_feat)
-
         loss_eval = loss(prediction,label)            
         loss_eval.backward()
         optimizer.step()
@@ -59,7 +58,7 @@ def test(model,device, test_loader,epoch,losslist):
     total = 0
     with torch.no_grad():
         for x in test_loader:
-            x_feat, TrueLabel = x['feature'].to(device), x['class_label'].to(device)
+            x_feat, TrueLabel = x['feature'].type(torch.FloatTensor).to(device), x['class_label'].type(torch.LongTensor).to(device)
             prediction = model(x_feat)
             _, predicted = torch.max(prediction, 1)
             total += TrueLabel.size(0)
@@ -99,6 +98,9 @@ test_loader = torch.utils.data.DataLoader(test_dataset,
 # Instantiate the network
 model_net = VoxceptionNet(n_classes=40).to(device)
 print('model loaded')
+model_net.apply(weights_init)
+nn.init.orthogonal_(model_net.input_conv.weight)
+nn.init.orthogonal_(model_net.fc[-2].weight)
 loss = nn.CrossEntropyLoss()
 
 optimizer = torch.optim.Adam(model_net.parameters(), lr=lr, weight_decay=reg_decay)
@@ -116,3 +118,4 @@ for epoch in range(1, num_epochs + 1):
     scheduler.step()
     train(model_net, device, train_loader, optimizer, epoch,partial_loss,loss)
     test(model_net, device, test_loader, epoch,global_loss)
+

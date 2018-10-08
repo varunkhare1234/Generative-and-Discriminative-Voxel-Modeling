@@ -13,16 +13,16 @@ from skimage import io, transform
     
 def weights_init(m):
     ##later call net = voxception(); net.apply(weights_init) to recursively set init
-    if isinstance(m, nn.Conv3d) or isinstance(m, nn.Linear):
+    if isinstance(m, nn.Conv3d) or isinstance(m,nn.Linear):
         nn.init.orthogonal_(m.weight.data, gain = torch.sqrt(2))
-        nn.init.orthogonal_(m.bias.data, gain = torch.sqrt(2))
+        nn.init.constant_(m.bias, 0)
     elif isinstance(m, nn.BatchNorm3d):
         nn.init.constant_(m.weight, 1)
         nn.init.constant_(m.bias, 0)
 #   explicitly set the init of these two layers to gain=1 later
 #         nn.init.orthogonal_(net.input_conv.weight)
 #         nn.init.orthogonal_(net.fc[-1].weight)
-                          
+ 
 class Voxception_Downsample_Layer(nn.Module):
     def __init__(self,numChannels,batch_norm=False,elu=False):
         super(Voxception_Downsample_Layer, self).__init__()
